@@ -69,3 +69,25 @@ internal func flatLift<T, U>(_ transform: @escaping (T) -> Result<U, Error>) -> 
         flat(lift(transform)(input))
     }
 }
+
+internal func flatLift2d<T1, T2, U>(_ transform: @escaping (T1, T2) -> Result<U, Error>) -> (Result<T1, Error>, Result<T2, Error>) -> Result<U, Error> {
+    { mt1, mt2 in
+        flatLift { t1 in
+            flatLift { t2 in
+                transform(t1, t2)
+            }(mt2)
+        }(mt1)
+    }
+}
+
+internal func flatLift3d<T1, T2, T3, U>(_ transform: @escaping (T1, T2, T3) -> Result<U, Error>) -> (Result<T1, Error>, Result<T2, Error>, Result<T3, Error>) -> Result<U, Error> {
+    { mt1, mt2, mt3 in
+        flatLift { t1 in
+            flatLift { t2 in
+                flatLift { t3 in
+                    transform(t1, t2, t3)
+                }(mt3)
+            }(mt2)
+        }(mt1)
+    }
+}

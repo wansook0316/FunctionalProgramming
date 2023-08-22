@@ -23,6 +23,10 @@ func main() {
     testOptionalFlatLift()
     testArrayFlatLift()
     testResultFlatLift()
+
+    testOptionalFlatLift2d()
+    testArrayFlatLift2d()
+    testResultFlatLift2d()
 }
 
 private func testStack() {
@@ -206,3 +210,37 @@ private func testResultFlatLift() {
     print(result1)
     print(result2)
 }
+
+private func testOptionalFlatLift2d() {
+    let x = Optional(3)
+    let y = Optional(4)
+
+    let result = flatLift2d { x, y in
+        Optional(x+y)
+    }(x, y)
+
+    print(result) // Optional(7)
+}
+
+private func testArrayFlatLift2d() {
+    let x = [3, 4, 5, 6]
+    let y = [10, 20, 30]
+
+    let result = flatLift2d { x, y in
+        [x+y]
+    }(x, y)
+
+    print(result) // [13, 23, 33, 14, 24, 34, 15, 25, 35, 16, 26, 36]
+}
+
+private func testResultFlatLift2d() {
+    let x: Result<Int, Error> = .success(10)
+    let y: Result<Int, Error> = .success(3)
+
+    let result = flatLift2d { x, y in
+        Result.success(x+y)
+    }(x, y)
+
+    print(result) // success(13)
+}
+
