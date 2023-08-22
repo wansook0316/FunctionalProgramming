@@ -7,6 +7,10 @@
 
 import Foundation
 
+enum ArrayScope {
+
+}
+
 internal func lift<T, U>(_ transform: @escaping (T) -> U) -> ([T]) -> [U] {
     return { (input: [T]) -> [U] in
         var result: [U] = []
@@ -14,5 +18,37 @@ internal func lift<T, U>(_ transform: @escaping (T) -> U) -> ([T]) -> [U] {
             result.append(transform(input[index]))
         }
         return result
+    }
+}
+
+internal func lift1<T, U, V>(_ transform: @escaping (T, U) -> V) -> ([T], U) -> [V] {
+    { (ft: [T], u: U) in
+        let f_u = { (t: T) -> V in
+            transform(t, u)
+        }
+        return lift(f_u)(ft)
+    }
+}
+
+internal func lift2<T, U, V>(_ transform: @escaping (T, U) -> V) -> (T, [U]) -> [V] {
+    { (t: T, fu: [U]) in
+        let f_v = { (u: U) -> V in
+            transform(t, u)
+        }
+        return lift(f_v)(fu)
+    }
+}
+
+internal func lift2dEasy<T, U, V>(_ transform: @escaping (T, U) -> V) -> ([T], [U]) -> [[V]] {
+    lift2(lift1(transform))
+}
+
+internal func lift2d<T, U, V>(_ transform: @escaping (T, U) -> V) -> ([T], [U]) -> [[V]] {
+    { ft, fu in
+        lift { (t: T) -> [V] in
+            lift { (u: U) -> V in
+                transform(t, u)
+            }(fu)
+        }(ft)
     }
 }
