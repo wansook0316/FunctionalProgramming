@@ -49,3 +49,18 @@ internal func lift2d<T, U, V>(_ transform: @escaping (T, U) -> V) -> (T?, U?) ->
         }(ft)
     }
 }
+
+internal func flat<T>(_ value: Optional<Optional<T>>) -> Optional<T> {
+    switch value {
+        case .none:
+            return .none
+        case .some(let wrapped):
+            return wrapped
+    }
+}
+
+internal func flatLift<T, U>(_ transform: @escaping (T) -> Optional<U>) -> ((Optional<T>) -> Optional<U>) {
+    { input in
+        flat(lift(transform)(input))
+    }
+}

@@ -19,6 +19,10 @@ func main() {
     testOptionalLift2d()
     testArrayLift2d()
     testResultLift2d()
+
+    testOptionalFlatLift()
+    testArrayFlatLift()
+    testResultFlatLift()
 }
 
 private func testStack() {
@@ -121,4 +125,84 @@ private func testResultLift2d() {
     }(x, y)
 
     print(result) // success(Swift.Result<Swift.Int, Swift.Error>.success(13))
+}
+
+private func testOptionalFlatLift() {
+    func f(_ x: Int) -> Optional<Int> {
+        return x + 1
+    }
+
+    func g(_ x: Int) -> Optional<Int> {
+        return x * 2
+    }
+
+    func h(_ x: Int) -> Optional<Int> {
+        let fx = f(x)
+        switch fx {
+        case .none:
+            return .none
+        case .some(let wrapped):
+            return .some(wrapped)
+        }
+    }
+
+    let optional = Optional.some(10)
+    let result1 = flatLift({ h($0) })(optional) // Optional.some(22)
+    let result2 = flatLift({ g($0) })(flatLift({ f($0) })(optional)) // Optional.some(22)
+    print(result1)
+    print(result2)
+}
+
+private func testArrayFlatLift() {
+    func f(_ x: Int) -> [Int] {
+        return [x + 1]
+    }
+
+    func g(_ x: Int) -> [Int] {
+        return [x * 2]
+    }
+
+    func h(_ x: Int) -> [Int] {
+        let fx = f(x)
+
+        var result: [Int] = []
+        for i in fx {
+            for j in g(i) {
+                result.append(j)
+            }
+        }
+        return result
+    }
+
+    let array = [3, 4, 5, 6]
+    let result1 = flatLift ({ h($0) })(array) // [8, 10, 12, 14]
+    let result2 = flatLift({ g($0) })(flatLift({ f($0) })(array)) // [8, 10, 12, 14]
+    print(result1)
+    print(result2)
+}
+
+private func testResultFlatLift() {
+    func f(_ x: Int) -> Result<Int, Error> {
+        return .success(x + 1)
+    }
+
+    func g(_ x: Int) -> Result<Int, Error> {
+        return .success(x * 2)
+    }
+
+    func h(_ x: Int) -> Result<Int, Error> {
+        let fx = f(x)
+        switch fx {
+        case .success(let success):
+            return .success(success)
+        case .failure(let failure):
+            return .failure(failure)
+        }
+    }
+
+    let result: Result<Int, Error> = .success(10)
+    let result1 = flatLift({ h($0) })(result) // success(22)
+    let result2 = flatLift({ g($0) })(flatLift({ f($0) })(result)) // success(22)
+    print(result1)
+    print(result2)
 }

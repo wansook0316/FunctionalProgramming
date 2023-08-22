@@ -52,3 +52,19 @@ internal func lift2d<T, U, V>(_ transform: @escaping (T, U) -> V) -> ([T], [U]) 
         }(ft)
     }
 }
+
+internal func flat<T>(_ value: [[T]]) -> [T] {
+    var result: [T] = []
+    for i in value {
+        for j in i {
+            result.append(j)
+        }
+    }
+    return result
+}
+
+internal func flatLift<T, U>(_ transform: @escaping (T) -> [U]) -> (([T]) -> [U]) {
+    { input in
+        flat(lift(transform)(input))
+    }
+}

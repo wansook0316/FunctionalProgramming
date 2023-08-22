@@ -49,3 +49,23 @@ internal func lift2d<T, U, V>(_ transform: @escaping (T, U) -> V) -> (Result<T, 
         }(ft)
     }
 }
+
+internal func flat<T>(_ value: Result<Result<T, Error>, Error>) -> Result<T, Error> {
+    switch value {
+    case let .success(success):
+        switch success {
+        case let .success(success):
+            return .success(success)
+        case let .failure(failure):
+            return .failure(failure)
+        }
+    case let .failure(failure):
+        return .failure(failure)
+    }
+}
+
+internal func flatLift<T, U>(_ transform: @escaping (T) -> Result<U, Error>) -> ((Result<T, Error>) -> Result<U, Error>) {
+    { input in
+        flat(lift(transform)(input))
+    }
+}
