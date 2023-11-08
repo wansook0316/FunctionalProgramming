@@ -7,6 +7,12 @@
 
 import Foundation
 
+internal func lift0<T>(_ transform: @escaping () -> T) -> (() -> T?) {
+    { () -> T? in
+        transform()
+    }
+}
+
 internal func lift<T, U>(_ transform: @escaping (T) -> U) -> (Optional<T>) -> Optional<U> {
     return { (input: Optional<T>) -> Optional<U> in
         switch input {
